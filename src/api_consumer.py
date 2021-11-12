@@ -6,35 +6,15 @@ from pyarrow import parquet as pq
 from pyarrow import Table as patable
 import logging
 
+#setup logging to send messages to terminal
 logging.basicConfig(format='%(levelname)s - %(asctime)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S', level=logging.INFO)
 
 
-# api_base_url = "https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositionsSimple"
-
-
-
-# api_url = api_base_url + '?client_id=' + api_params['client_id'] + '&client_secret=' + api_params['client_secret']
-
-# response = requests.get(api_url)
-
-
-# lineas = ["159B","159E","159A"]
-
-# jsonout = [i for i in response.json() if i["route_short_name"] in lineas]
-# pd.DataFrame(jsonout)
-
-# tableexp = patable.from_pandas(pd.DataFrame(jsonout))
-# pq.write_table(tableexp, 'out/example.parquet')
-
-# pq.read_table('out/example.parquet', columns= ['latitude', 'longitude']).to_pandas()
-
-
-
-
 def get_data(): 
+  """Constructs API query to retrieve data from chosen buses. it returns a list of dicts and relies on \
+    an access token and an access token secret in order to authenticate with the API"""
 
   api_base_url = "https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositionsSimple"
-
 
   api_url = api_base_url + '?client_id=' + access_token + '&client_secret=' + access_token_secret
 
@@ -48,6 +28,10 @@ def get_data():
   return json_out
 
 def store_data(data, counter):
+  """Coherces list of dicts to a tabular struct (df), sets it as a PyArrow table \
+    and writes it as a parquet file in the out path  using counter value \
+       to genuinelly identify each document"""
+  
   pdf = pd.DataFrame(data)
   tableexp = patable.from_pandas(pdf)
   pq.write_table(tableexp, f"out/sample_{counter}.parquet")
@@ -81,7 +65,7 @@ if __name__ == '__main__':
     datum = get_data()
     data.extend(datum)
     logging.info(f"data has {len(data)} rows, setting system to sleep")
-    time.sleep(10)
+    time.sleep(240)
 
 
 
